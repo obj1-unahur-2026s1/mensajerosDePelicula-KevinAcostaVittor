@@ -21,6 +21,16 @@ object mensajeria{
     
     method pesoUltimoMensajero() = if (!mensajeros.isEmpty()) { mensajeros.last().peso() }
 
+    // Parte 3
+
+    method paquetesPendientes() = paquetesPendientes
+
+    method agregarPaquetePendiente(paquete) = paquetesPendientes.add(paquete)
+
+    method quitarPaquetePendiente(paquete) = if (paquetesPendientes.contains(paquete)) paquetesPendientes.remove(paquete)
+
+    method paquetesEnviados() = paquetesEnviados
+
     method algunMensajeroPuedeEntregar(paquete) = mensajeros.any( {m => paquete.puedeSerEntregadoPor(m)} )
 
     method mensajerosQuePuedenEntregar(paquete) = mensajeros.filter( {m => paquete.puedeSerEntregadoPor(m)} )
@@ -32,13 +42,22 @@ object mensajeria{
     method enviarPaquete(paquete) {
         const aptos = self.mensajerosQuePuedenEntregar(paquete)
 
-        if (!aptos.isEmpty()){
-            const mensajeroElegido = aptos.anyOne()
-            
-            paquetesEnviados.add(paquete)
+        if (aptos.isEmpty()){
+            self.agregarPaquetePendiente(paquete)
         } else {
-            paquetesPendientes.add(paquete)
+            aptos.anyOne()
+            paquetesEnviados.add(paquete)
+
+            self.quitarPaquetePendiente(paquete)
+            // De paquetePendiente pasa a ser paqueteEnviado en caso de enviarse
         }
     }
-    method facturacion() = paquetesEnviados.sum({p => p.precio()})
+
+    method facturacion() = paquetesEnviados.sum( {p => p.precio()} )
+
+    method enviarPaquetes(paquetes) { paquetes.forEach( {p => self.enviarPaquete(p)} ) }
+
+    method enviarPaquetePendienteMasCaro() { self.enviarPaquete(self.paquetePendienteMasCaro()) }
+
+    method paquetePendienteMasCaro() = paquetesPendientes.max( {p => p.precio()} )
 }

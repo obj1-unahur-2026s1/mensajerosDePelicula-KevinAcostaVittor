@@ -53,3 +53,20 @@ object paquetonViajero{
 
     method quitarDestino(destino) = destinos.remove(destino)
 }
+
+object paquetePremium{
+    var estaPago = true
+    var destino = matrix
+
+    method puedeSerEntregadoPor(mensajero) = estaPago
+
+    method estaPago() = estaPago
+
+    method fuePago() { estaPago = true }
+
+    method noFuePago() { estaPago = false }
+
+    method precio() = 75
+
+    method cambiarDestinoA(nuevoDestino) { destino = nuevoDestino }
+}

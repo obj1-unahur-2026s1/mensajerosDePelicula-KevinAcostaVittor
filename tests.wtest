@@ -5,15 +5,15 @@ import empresa.*
 
 describe "Serie de tests de diferentes situaciones"
 {
-    test "Roberto (90kg) puede llevar un paquete que está pago en un camión que tiene un acoplado." {
+    test "Roberto (90kg) puede llevar un paquete que está pago en un camión que tiene un acoplado" {
         roberto.pesoPropio(90)
         paquete.fuePago()
         roberto.cambiarVehiculo(camion)
-        camion.cambiarCantidadAcoplados(1)
+        camion.agregarAcoplados(1)
         assert.that(paquete.puedeSerEntregadoPor(roberto))
     }
 
-    test "Neo con crédito no puede llevar un paquete que no está pago a la matrix." {
+    test "Neo con crédito no puede llevar un paquete que no está pago a la matrix" {
         neo.cargarCredito()
         paquete.noFuePago()
         assert.notThat(paquete.puedeSerEntregadoPor(neo))
@@ -40,14 +40,14 @@ describe "Test empresa.wlk por cada punto de segunda parte" {
         assert.equals([], mensajeria.mensajeros())
     }
 
-    test "Analiza si mensajeria es grande." {
+    test "Analiza si mensajeria es grande" {
         mensajeria.contratarMensajero(roberto)
         mensajeria.contratarMensajero(chuckNorris)
         mensajeria.contratarMensajero(neo)
         assert.that(mensajeria.esGrande())
     }
 
-    test "Paquete puede ser entregado por primer empleado." {
+    test "Paquete puede ser entregado por primer empleado" {
         mensajeria.contratarMensajero(chuckNorris)
         mensajeria.contratarMensajero(roberto)
         assert.that(mensajeria.primerEmpleadoPuedeEntregar())
@@ -58,5 +58,65 @@ describe "Test empresa.wlk por cada punto de segunda parte" {
         mensajeria.contratarMensajero(roberto)
         mensajeria.contratarMensajero(chuckNorris)
         assert.equals(80, mensajeria.pesoUltimoMensajero())
+    }
+}
+
+describe "Test empresa.wlk por cada punto de tercera parte"{
+    method initialize() {
+        mensajeria.contratarMensajero(neo)
+        mensajeria.contratarMensajero(roberto)
+        mensajeria.contratarMensajero(chuckNorris)
+        mensajeria.contratarMensajero(bart)
+    }
+
+    test "Un mensajero puede entregar paquete" {
+        assert.that(mensajeria.algunMensajeroPuedeEntregar(paquetito))
+    }
+
+    test "Mensajeros que pueden entregar paquete. Verifica que sea neo y chuckNorris" {
+        paquete.cambiarDestinoA(matrix) // Roberto deberia dejar de poder, al no tener como llamar
+        bart.perderSkate()              // Bart deberia dejar de poder, al no alcanzar telefono a tiempo
+        assert.equals([neo, chuckNorris], mensajeria.mensajerosQuePuedenEntregar(paquete))
+    }
+
+    test "Saber si una mensajería tiene sobrepeso" {
+        roberto.cambiarVehiculo(camion)
+        camion.agregarAcoplados(6)
+        assert.that(mensajeria.tieneSobrepeso())
+    }
+
+    test "Mensajeria envia un paquete eligiendo mensajero que puede enviar. Se espera 75 y lista vacia de paquetesPendientes" {
+		paquete.cambiarDestinoA(matrix) // Chuck puede llevarlo (llama y pesa 80)
+		
+		mensajeria.enviarPaquete(paquetePremium) // Precio: 75
+		
+		assert.equals(75, mensajeria.facturacion())
+		assert.that(mensajeria.paquetesPendientes().isEmpty())
+    }
+
+    test "Conocer la facturación de la empresa, que es el total ganado por los paquetes enviados. Se espera 275" {
+        mensajeria.enviarPaquete(paquetePremium)
+        paquetonViajero.agregarDestino(puenteBrooklyn)
+        paquetonViajero.agregarDestino(matrix)
+        mensajeria.enviarPaquete(paquetonViajero)
+        assert.equals(275, mensajeria.facturacion())
+    }
+
+    test "Dado un conjunto de paquetes, enviarlos a todos. Se esperan los 4 tipos de paquete" {
+        mensajeria.agregarPaquetePendiente(paquete)
+        mensajeria.agregarPaquetePendiente(paquetito)
+        mensajeria.agregarPaquetePendiente(paquetonViajero)
+        mensajeria.agregarPaquetePendiente(paquetePremium)
+        mensajeria.enviarPaquetes(mensajeria.paquetesPendientes())
+        assert.equals([paquete, paquetito, paquetonViajero, paquetePremium], mensajeria.paquetesEnviados())
+    }
+
+    test "Encontrar el paquete pendiente más caro y enviarlo. Se espera enviar paquetonViajero" {
+        mensajeria.agregarPaquetePendiente(paquete)
+        mensajeria.agregarPaquetePendiente(paquetePremium)
+        mensajeria.agregarPaquetePendiente(paquetonViajero)
+        paquetonViajero.agregarDestino(puenteBrooklyn)
+        mensajeria.enviarPaquetePendienteMasCaro()
+        assert.equals([paquetonViajero], mensajeria.paquetesEnviados())
     }
 }
