@@ -1,0 +1,62 @@
+import destinos.*
+import mensajeros.*
+import paquetes.*
+import empresa.*
+
+describe "Serie de tests de diferentes situaciones"
+{
+    test "Roberto (90kg) puede llevar un paquete que está pago en un camión que tiene un acoplado." {
+        roberto.pesoPropio(90)
+        paquete.fuePago()
+        roberto.cambiarVehiculo(camion)
+        camion.cambiarCantidadAcoplados(1)
+        assert.that(paquete.puedeSerEntregadoPor(roberto))
+    }
+
+    test "Neo con crédito no puede llevar un paquete que no está pago a la matrix." {
+        neo.cargarCredito()
+        paquete.noFuePago()
+        assert.notThat(paquete.puedeSerEntregadoPor(neo))
+    }
+}
+
+describe "Test empresa.wlk por cada punto de segunda parte" {
+    test "Contrata un mensajero" {
+        mensajeria.contratarMensajero(roberto)
+        assert.equals([roberto], mensajeria.mensajeros())
+    }
+
+    test "Despide un mensajero" {
+        mensajeria.contratarMensajero(roberto)
+        mensajeria.despedirMensajero(roberto)
+        assert.equals([], mensajeria.mensajeros())
+    }
+
+    test "Despide todos los mensajeros"{
+        mensajeria.contratarMensajero(roberto)
+        mensajeria.contratarMensajero(chuckNorris)
+        mensajeria.contratarMensajero(neo)
+        mensajeria.despedirTodosMensajeros()
+        assert.equals([], mensajeria.mensajeros())
+    }
+
+    test "Analiza si mensajeria es grande." {
+        mensajeria.contratarMensajero(roberto)
+        mensajeria.contratarMensajero(chuckNorris)
+        mensajeria.contratarMensajero(neo)
+        assert.that(mensajeria.esGrande())
+    }
+
+    test "Paquete puede ser entregado por primer empleado." {
+        mensajeria.contratarMensajero(chuckNorris)
+        mensajeria.contratarMensajero(roberto)
+        assert.that(mensajeria.primerEmpleadoPuedeEntregar())
+    }
+
+    test "Peso ultimo mensajero" {
+        mensajeria.contratarMensajero(neo)
+        mensajeria.contratarMensajero(roberto)
+        mensajeria.contratarMensajero(chuckNorris)
+        assert.equals(80, mensajeria.pesoUltimoMensajero())
+    }
+}
